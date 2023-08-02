@@ -1,0 +1,145 @@
+<?php
+// Configurações de conexão com o banco de dados
+$endereco = '167.99.252.245';
+$usuario = 'ESW2023_E1';
+$senha = 'equipe1';
+$bd = 'ESW2023_E1';
+
+try {
+    // Estabelece a conexão com o banco de dados
+    $connect = new mysqli($endereco, $usuario, $senha, $bd);
+    if ($connect->connect_error) {
+        die("Falha na conexão: " . $connect->connect_error);
+    }
+
+    // Query para criar a tabela "Mercado", caso ela não exista
+    $qry = "CREATE TABLE IF NOT EXISTS Mercadoprovatresa (
+                ID INT AUTO_INCREMENT PRIMARY KEY,
+                MES INT NOT NULL,
+                ANO INT NOT NULL,
+                FATURAMENTO INT NOT NULL,
+                GASTOS INT NOT NULL
+            )";
+
+    // Executa a query de criação da tabela
+    if ($connect->query($qry) === TRUE) {
+        echo "Tabela criada com sucesso ou já existente.";
+    } else {
+        echo "Erro ao criar tabela: " . $connect->error;
+    }
+
+    // Fecha a conexão com o banco de dados
+    $connect->close();
+} catch (Exception $e) {
+    echo 'Exceção capturada: ' . $e->getMessage();
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Obtém os valores do formulário
+    $mes = isset($_POST["mes"]) ? $_POST["mes"] : '';
+    $ano = isset($_POST["ano"]) ? $_POST["ano"] : '';
+    $faturamento = isset($_POST["faturamento"]) ? $_POST["faturamento"] : '';
+    $gastos = isset($_POST["gastos"]) ? $_POST["gastos"] : '';
+    try {
+        // Estabelece a conexão com o banco de dados
+        $connect = new mysqli($endereco, $usuario, $senha, $bd);
+        if ($connect->connect_error) {
+            die("Falha na conexão: " . $connect->connect_error);
+        }
+
+        // Query para inserir os dados na tabela "Mercadoprovatresa"
+        $qry = "INSERT INTO Mercadoprovatresa (MES, ANO, FATURAMENTO, GASTOS) VALUES ('$mes','$ano','$faturamento','$gastos')";
+
+        // Prepara a query e vincula os parâmetros
+        $stmt = $connect->prepare($qry);
+        $stmt->bind_param("is", $mes, $ano, $faturamento, $gastos);
+        $stmt->execute();
+
+        // Verifica se os dados foram inseridos com sucesso
+        if ($stmt->affected_rows > 0) {
+            echo "Dados inseridos com sucesso!";
+        } else {
+            echo "Nenhum dado foi inserido.";
+        }
+
+        // Fecha o statement e a conexão com o banco de dados
+        $stmt->close();
+        $connect->close();
+    } catch (Exception $e) {
+        echo 'Exceção capturada: ' .  $e->getMessage();
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário PHP</title>
+    <style>
+    
+        h1{
+            font-family:Arial, Helvetica, sans-serif;
+            text-align: center;
+        }
+        input{
+            border-radius: 10px;
+            background-color: #fcf0f1;
+            margin-top: 10px;
+            padding: 15px 35px 15px 35px;
+            border: none;
+        }
+        .faturamento{
+            text-align: center;
+        }
+        .gastos{
+            text-align: center;
+        }
+        .mes{
+            text-align: center;
+
+        }
+        .ano{
+            text-align: center;
+        }
+        .button{
+            text-align: center;
+        }
+        body{
+            background-color: pink;
+        }
+        .centro{
+
+            border-radius: 10px;
+            padding: px;
+        }
+
+    
+    </style>
+</head>
+<body>
+    <div class= "centro">
+        <h1>Formulário PHP</h1>
+
+        <form method="POST" action="aps4.php">
+        <!-- Campos para inserir a mes, ano, faturamento e gastos -->
+            <div class= "mes">
+                <input type="text" name="mes" placeholder="Mes">
+            </div>
+            <div class= "ano">
+                <input type="number" name="ano" placeholder="Ano">
+            </div>
+            <div class= "faturamento">
+                <input type="number" name="ano" placeholder="Faturamento">
+            </div>
+            <div class = "gastos">
+                <input type="number" name="gastos" placeholder="Gastos">
+            </div>
+        <!-- Botão para submeter o formulário -->
+            <div class="button" >
+                <input type="submit" value="Salvar" style= "background-color: #FF748C; ">
+            </div>
+    </div>
+    </form>
+</body>
+</html>
